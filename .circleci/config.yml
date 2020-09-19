@@ -8,8 +8,11 @@ jobs:
       - run:
           name: スクリプトのチェック
           command: |
-            find . -type f -name '*.sh' | wc -l
-            find . -type f -name '*.sh' | xargs shellcheck --external-sources
+            if [ `find . -type f -name '*.sh' | wc -l` -gt  0 ]; then
+              find . -type f -name '*.sh' | xargs shellcheck --external-sources
+            else
+              echo 'no scripts were detected'
+            fi
   start-instance:
     docker:
       - image: koalaman/shellcheck-alpine:stable

@@ -1,13 +1,33 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
-version: 2.1
-# Use a package of configuration called an orb.
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
+version: 2
+jobs:
+  shellcheck:
+    docker:
+      - image: koalaman/shellcheck-alpine:stable
+    steps:
+      - checkout
+      - run:
+          name: スクリプトのチェック
+          command: |
+            find . -type f -name '*.sh' | wc -l
+            find . -type f -name '*.sh' | xargs shellcheck --external-sources
+  start-instance:
+    docker:
+      - image: koalaman/shellcheck-alpine:stable
+    steps:
+      - checkout
+      - run:
+          name: インスタンスの開始
+          command: |
+            curl https://1neuyud4aj.execute-api.us-east-1.amazonaws.com/prod/us-east-1/i-0dd1c8675f4c06f43
+
 workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
+  version: 2
+  workflow:
     jobs:
-      - welcome/run
+      - shellcheck
+      - start-instance:
+          requires:
+            - shellcheck
+          filters:
+            branches:
+              only: master
